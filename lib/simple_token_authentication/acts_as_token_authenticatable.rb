@@ -1,3 +1,4 @@
+require 'mongoid'
 module SimpleTokenAuthentication
   module ActsAsTokenAuthenticatable
     extend ActiveSupport::Concern
@@ -5,11 +6,13 @@ module SimpleTokenAuthentication
     # Please see https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
     # before editing this file, the discussion is very interesting.
 
+
     included do
       private :generate_authentication_token
     end
 
     def ensure_authentication_token
+
       if authentication_token.blank?
         self.authentication_token = generate_authentication_token
       end
@@ -18,7 +21,9 @@ module SimpleTokenAuthentication
     def generate_authentication_token
       loop do
         token = Devise.friendly_token
-        break token unless self.class.exists?(authentication_token: token)
+        break token unless self.class.exists?(:authentication_token => token)
+	#break token unless self.class.where(authentication_token: token).count > 0
+       
       end
     end
 
@@ -30,4 +35,5 @@ module SimpleTokenAuthentication
     end
   end
 end
-ActiveRecord::Base.send :include, SimpleTokenAuthentication::ActsAsTokenAuthenticatable
+Mongoid::Document.send :include, SimpleTokenAuthentication::ActsAsTokenAuthenticatable
+#ActiveRecord::Base.send :include, SimpleTokenAuthentication::ActsAsTokenAuthenticatable
